@@ -1,4 +1,4 @@
-# ganify
+# GANify
 <p align="center">
 <img width="200" height="200" src="https://github.com/arnonbruno/ganify/blob/master/logo.png">
 </p>
