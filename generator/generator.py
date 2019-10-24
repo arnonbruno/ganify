@@ -8,22 +8,22 @@ class Generator():
         self.init = init
         self.feat = features
 
-def get_generator(self):
-    self.generator = Sequential()
-    self.generator.add(Dense(128, input_dim=self.random_dim, kernel_initializer=self.init))
-    self.generator.add(BatchNormalization())
-    self.generator.add(LeakyReLU(.2))
-    self.generator.add(Dropout(.5))
+    def get_generator(self):
+        self.generator = Sequential()
+        self.generator.add(Dense(128, input_dim=self.random_dim, kernel_initializer=self.init))
+        self.generator.add(BatchNormalization())
+        self.generator.add(LeakyReLU(.2))
+        self.generator.add(Dropout(.5))
 
-    self.generator.add(Dense(256))
-    self.generator.add(BatchNormalization())
-    self.generator.add(LeakyReLU(.2))
-    self.generator.add(Dropout(.5))
+        self.generator.add(Dense(256))
+        self.generator.add(BatchNormalization())
+        self.generator.add(LeakyReLU(.2))
+        self.generator.add(Dropout(.5))
 
-    self.generator.add(Dense(512))
-    self.generator.add(BatchNormalization())
-    self.generator.add(LeakyReLU(.2))
-    self.generator.add(Dropout(.5))
+        self.generator.add(Dense(512))
+        self.generator.add(BatchNormalization())
+        self.generator.add(LeakyReLU(.2))
+        self.generator.add(Dropout(.5))
 
-    self.generator.add(Dense(len(self.feat), activation='tanh'))
-    return self.generator
+        self.generator.add(Dense(len(self.feat), activation='tanh'))
+        return self.generator
