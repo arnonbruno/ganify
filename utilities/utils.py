@@ -1,16 +1,7 @@
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras import backend as K
 from tensorflow.keras.constraints import Constraint
-from tensorflow.keras import initializers
 from tensorflow.keras.optimizers import RMSprop, Adam
-from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, LeakyReLU, Input
-from tensorflow.keras.models import Sequential, Model
-from tqdm import tqdm
-import pandas as pd
-import numpy as np
-import seaborn as sns
-from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
 
 
 class ClipConstraint(Constraint):
@@ -26,6 +17,7 @@ class ClipConstraint(Constraint):
 	def get_config(self):
 		return {'clip_value': self.clip_value}
 
+
 class Utilities():
     def __init__(self):
         self.type = type
@@ -37,9 +29,14 @@ class Utilities():
     def get_optimizer_gan(self):
         return Adam(lr=.0002, beta_1=.5)
 
-    def wasserstein_loss(self, y_pred, y_true):
+    def get_wasserstein_loss(self, y_pred, y_true):
         self.loss = K.mean(y_pred*y_true)
         return self.loss
 
-    def get_random_dim():
+    def get_random_dim(self):
         return 100
+
+    def transform_data(self, data):
+        self.scaler = MinMaxScaler(feature_range=(-1, 1)).fit(data)
+        self.x_train = self.scaler.transform(data)
+        return self.x_train, self.scaler
