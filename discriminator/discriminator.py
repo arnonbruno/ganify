@@ -4,13 +4,12 @@ from tensorflow.keras.models import Sequential
 from utilities.utils import Utilities
 
 
-class Critic():
+class Discriminator():
     def __init__(self, data, init=RandomNormal(mean=0.0, stddev=0.02)):
         self.init = init
         self.utilities = Utilities()
         self.optimizer = self.utilities.get_optimizer_gan()
         self.feat = data.shape[1]
-        self.loss = self.utilities.get_wasserstein_loss
 
     def get_discriminator(self):
         discriminator = Sequential()

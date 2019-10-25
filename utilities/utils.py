@@ -33,6 +33,9 @@ class Utilities():
         self.loss = K.mean(y_pred*y_true)
         return self.loss
 
+    def get_gan_loss(self):
+        return 'binary_crossentropy'
+
     def get_random_dim(self):
         return 100
 

@@ -1,6 +1,7 @@
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
 from discriminator.critic import Critic
+from discriminator.discriminator import Discriminator
 from generator.generator import Generator
 from utilities.utils import Utilities
 from tqdm import tqdm
@@ -47,7 +48,12 @@ class Ganify():
             self.adversary_one, self.adversary_two, self.d1_hist, self.d2_hist, self.g_hist = self.train_gan(
                 self.x_train, self.y_train, self.epochs, self.batch_size)
         elif self.type == 'gan':
-            print('put otha')
+            self.discriminator = Discriminator(self.x_train)
+            self.adversary_two = self.discriminator.get_discriminator()
+            self.loss = self.utils.get_gan_loss()
+            self.opt = self.utils.get_optimizer_gan()
+            self.adversary_one, self.adversary_two, self.d1_hist, self.d2_hist, self.g_hist = self.train_gan(
+                self.x_train, self.y_train, self.epochs, self.batch_size)
         else:
             raise RuntimeError(
                 'Invalid type o GAN, please select a valid option. See documentation for datails.')
