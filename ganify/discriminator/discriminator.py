@@ -1,7 +1,7 @@
 from tensorflow.keras.layers import Dense, LeakyReLU, BatchNormalization, Dropout
 from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.models import Sequential
-from utilities.utils import Utilities
+from ganify.utilities.utils import Utilities
 
 
 class Discriminator():
