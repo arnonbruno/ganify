@@ -1,5 +1,5 @@
 import pathlib
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -17,8 +17,9 @@ setup(
     url="https://github.com/arnonbruno/ganify",
     author="Arnon Bruno",
     author_email="asantos.quantum@gmail.com",
-    packages=['model', 'discriminator', 'generator', 'utilities'],
+    packages=find_packages(),
     include_package_data=True,
+    python_requires='>=3.6',
     install_requires=['tensorflow>=2.0.0', 'pandas>=0.25',
                       'numpy>=1.16', 'scikit-learn>=0.21', 'matplotlib>=3.1'],
 )
