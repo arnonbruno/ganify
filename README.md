@@ -19,7 +19,7 @@ Once installed, simply import the library and instatiate the model as described 
 </p>
 
 <b> Other info: </b>
-The package also enables the creation of synthetic data using both <b> GANs </b> and <b> WGANs </b>, by simply changing the argument <i>"type"</i> on <i>"fit_data"</i>
+The package also enables the creation of synthetic data using both <b> GANs </b> (Bengio et al., 2014) and <b> WGANs </b> (Chintala et al. 2017), by simply changing the argument <i>"type"</i> on <i>"fit_data"</i>
 Additionally, you can view the model overall loss performance by calling the <i>"plot_performance()"</i> method after fit.
 
 <b> Further improvements: </b>
