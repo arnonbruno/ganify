@@ -15,15 +15,15 @@ class Critic():
 
     def get_critic(self):
         self.critic = Sequential()
-        self.critic.add(Dense(512, input_dim=self.feat,
+        self.critic.add(Dense(self.feat*8, input_dim=self.feat,
                               kernel_initializer=self.init, kernel_constraint=self.const))
         self.critic.add(LeakyReLU(.2))
 
-        self.critic.add(Dense(256, kernel_initializer=self.init,
+        self.critic.add(Dense(self.feat*4, kernel_initializer=self.init,
                               kernel_constraint=self.const))
         self.critic.add(LeakyReLU(.2))
 
-        self.critic.add(Dense(128, kernel_initializer=self.init,
+        self.critic.add(Dense(self.feat*2, kernel_initializer=self.init,
                               kernel_constraint=self.const))
         self.critic.add(LeakyReLU(.2))
 
