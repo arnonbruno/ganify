@@ -11,6 +11,13 @@ import matplotlib.pyplot as plt
 
 
 class Ganify():
+    '''
+    Class to instantiate the ganify model.
+    To ease utilization, the model parameters are fixed based on original GAN (Bengio et al., 2014) and WGAN (Chintala et al. 2017) papers,
+    as well as best pratices found on "Stabilizing Training of Generative Adversarial Networks through Regularization" (Hofmann et al. 2017) and
+    "Improved Techniques for Training GANs" (Chen et al. 2016).
+    '''
+
     def __init__(self):
         self.utils = Utilities()
         self.random_dim = self.utils.get_random_dim()
@@ -19,6 +26,27 @@ class Ganify():
         np.random.seed(self.seed)
 
     def fit_data(self, x_train, y_train, type='wgan', cols_names=None, batch_size=8, epochs=1):
+        """Fit the GANify model.
+
+        Keyword arguments:
+        x_train -- array or dataframe
+        The real samples from which the GAN will create synthetic samples, which target.
+
+        y_train -- array or Series
+        Target from real data. Usually, this will be an array of identical numbers.
+
+        type -- str
+        The type of Generative model to fit. Possible arguments are GAN (Bengio et al., 2014) and WGAN (Chintala et al. 2017) (default: 'wgan')
+
+        cols_names -- array
+        Name of original feature columns if dataframe. This might be necessary if producing a new dataframe of synthetic samples afterwards
+
+        batch_size -- int
+        Amount of data in batches to use for training and weighting (default: 8)
+
+        epochs -- int
+        The number of times the whole dataset will be used for traning. As there is no "best choice" for this parameter, one might considering analyzing loss to decide it (default: 1)
+        """
         self.x_train = np.array(x_train)
         self.y_train = np.array(y_train)
         if len(self.x_train.shape) > 2:
@@ -112,6 +140,18 @@ class Ganify():
         return self.adversary_one, self.adversary_two, self.d1_hist, self.d2_hist, self.g_hist
 
     def create_bulk(self, lenght, output=None):
+        """Function to create synthetic data after fit.
+
+        Keyword arguments:
+        lenght -- int
+        The amount of data to be created
+
+        output -- int or None
+        Whether to output data as a dataframe. If None, outputs arrays. If 1, it might need cols_names from "fit_data" to generate proper dataframe columns names (default: None)
+
+        Returns:
+        Array or dataframe contaning the number of synthetic data specified on "lenght"
+        """
         if self.f is False:
             raise RuntimeError(
                 'Model not fit to data yet. Please train the model with fit_data first')
@@ -136,6 +176,9 @@ class Ganify():
         return self.fake_data
 
     def plot_performance(self):
+        '''
+        Function to plot loss curves for discriminator (or critic) trained on real and generated samples, as well as the loss of generator.
+        '''
         plt.figure(figsize=(10, 6))
         plt.plot(self.d1_hist, color='b', label='Real')
         plt.plot(self.d2_hist, color='r', label='Fake')
