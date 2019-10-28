@@ -5,10 +5,10 @@
 
 GANify is an algorithm based on Generative Adversarial Learning to generate synthetic. The name GANify is an adaptation of acronym <b>GAN</b> (generative adversarial network) and Ampl<b>IFY</b>, meaning you can amplify the amount of data available with GANs 
 
-<p>
+
 <b> Install </b>
-One can easily install GANify using the command below:
-</p>
+One can easily install GANify using the PIP:
+
 <i>pip install ganify</i>
 
 
