@@ -1,4 +1,4 @@
-# GANify
+# GANify (v. 1.0.10)
 <p align="center">
 <img width="200" height="200" src="https://github.com/arnonbruno/ganify/blob/master/logo.png">
 </p>
@@ -9,7 +9,7 @@
 <b> Installation: </b>
 One can easily install GANify using the PIP:
 
-<i>pip install ganify</i>
+<i>pip install ganify==1.0.10</i>
 
 
 <b>How to use:</b>
@@ -21,3 +21,6 @@ Once installed, simply import the library and instatiate the model as described 
 <b> Other info: </b>
 The package also enables the creation of synthetic data using both <b> GANs </b> and <b> WGANs </b>, by simply changing the argument <i>"type"</i> on <i>"fit_data"</i>
 Additionally, you can view the model overall loss performance by calling the <i>"plot_performance()"</i> method after fit.
+
+<b> Further improvements: </b>
+Early stopping to optimize training interruption
