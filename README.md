@@ -19,7 +19,7 @@ Once installed, simply import the library and instatiate the model as described 
 </p>
 
 <b> Other info: </b>
-The package also enables the creation of synthetic data using both <b> GANs </b> (Bengio et al., 2014) and <b> WGANs </b> (Chintala et al. 2017), by simply changing the argument <i>"type"</i> on <i>"fit_data"</i>
+The package also enables the creation of synthetic data using both <b> GANs </b> (Bengio et al., 2014) and <b> WGANs </b> (Chintala et al. 2017), by simply changing the argument <i>"type"</i> on <i>"fit_data"</i>.
 Additionally, you can view the model overall loss performance by calling the <i>"plot_performance()"</i> method after fit.
 
 <b> Further improvements: </b>
@@ -33,3 +33,5 @@ Wasserstein GAN (Chintala et al. 2017) - https://arxiv.org/abs/1701.07875
 Stabilizing Training of Generative Adversarial Networks through Regularization (Hofmann, 2017) - https://papers.nips.cc/paper/6797-stabilizing-training-of-generative-adversarial-networks-through-regularization.pdf
 
 Improved Techniques for Training GANs (Chen et al., 2017) - https://arxiv.org/abs/1606.03498
+
+Big thanks to Jason Brownlee from Machine Learning Mastery. If you don't know his blog, you centainly must: https://machinelearningmastery.com/
