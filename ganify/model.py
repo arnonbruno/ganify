@@ -1,9 +1,9 @@
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
-from discriminator.critic import Critic
-from discriminator.discriminator import Discriminator
-from generator.generator import Generator
-from utilities.utils import Utilities
+from ganify.discriminator.critic import Critic
+from ganify.discriminator.discriminator import Discriminator
+from ganify.generator.generator import Generator
+from ganify.utilities.utils import Utilities
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -27,10 +27,10 @@ class Ganify():
         if len(np.unique(self.y_train)) > 1:
             raise RuntimeError(
                 'More than 1 classes to amplify on target. Ideally, you want to create fake examples from one single class')
-        if cols_names is not None and len(cols_names) != x_train.shape[1] + 1:
+        if cols_names is not None and len(cols_names) != x_train.shape[1]:
             raise RuntimeError(
                 'Column names must be an array with the same size as input data')
-        elif cols_names is not None and len(cols_names) == x_train.shape[1] + 1:
+        elif cols_names is not None and len(cols_names) == x_train.shape[1]:
             self.cols_names = cols_names
         self.gen = Generator(self.x_train)
         self.adversary_one = self.gen.get_generator()
@@ -130,8 +130,6 @@ class Ganify():
         	pred_value.append(pred)
         self.fake_data = np.reshape(np.array(self.fake_data), newshape=(
     		np.array(self.fake_data).shape[0], np.array(self.fake_data).shape[2]))
-        self.fake_data = np.hstack(
-            (self.fake_data, np.expand_dims(pred_value, 1)))
         if output == 1:
             self.fake_data = pd.DataFrame(
                 columns=self.cols_names, data=self.fake_data)

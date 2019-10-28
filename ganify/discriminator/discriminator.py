@@ -1,7 +1,7 @@
 from tensorflow.keras.layers import Dense, LeakyReLU, BatchNormalization, Dropout
 from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.models import Sequential
-from utilities.utils import Utilities
+from ganify.utilities.utils import Utilities
 
 
 class Discriminator():
@@ -13,18 +13,18 @@ class Discriminator():
 
     def get_discriminator(self):
         discriminator = Sequential()
-        discriminator.add(Dense(512, input_dim=self.feat,
+        discriminator.add(Dense(self.feat*8, input_dim=self.feat,
                                 kernel_initializer=self.init))
         discriminator.add(BatchNormalization())
         discriminator.add(LeakyReLU(.2))
         discriminator.add(Dropout(.5))
 
-        discriminator.add(Dense(256))
+        discriminator.add(Dense(self.feat*4))
         discriminator.add(BatchNormalization())
         discriminator.add(LeakyReLU(.2))
         discriminator.add(Dropout(.5))
 
-        discriminator.add(Dense(128))
+        discriminator.add(Dense(self.feat*2))
         discriminator.add(BatchNormalization())
         discriminator.add(LeakyReLU(.2))
         discriminator.add(Dropout(.5))
