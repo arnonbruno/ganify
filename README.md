@@ -24,3 +24,9 @@ Additionally, you can view the model overall loss performance by calling the <i>
 
 <b> Further improvements: </b>
 Early stopping to optimize training interruption
+
+<b> References: </b>
+Generative Adversarial Nets (Bengio et al. 2014) - https://arxiv.org/pdf/1406.2661.pdf
+Wasserstein GAN (Chintala et al. 2017) - https://arxiv.org/abs/1701.07875
+Stabilizing Training of Generative Adversarial Networks through Regularization (Hofmann, 2017) - https://papers.nips.cc/paper/6797-stabilizing-training-of-generative-adversarial-networks-through-regularization.pdf
+Improved Techniques for Training GANs (Chen et al., 2017) - https://arxiv.org/abs/1606.03498
