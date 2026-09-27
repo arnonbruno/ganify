@@ -1,11 +1,5 @@
 import numpy as np
-from tensorflow.keras.layers import (
-    BatchNormalization,
-    Dense,
-    Dropout,
-    Input,
-    LeakyReLU,
-)
+from tensorflow.keras.layers import Dense, Dropout, Input, LeakyReLU
 from tensorflow.keras.models import Model
 
 from ganify.utilities.utils import Utilities, hidden_width, kernel_initializer
@@ -38,9 +32,9 @@ class Discriminator:
         hidden = inputs
         for index, width in enumerate(widths):
             hidden = Dense(width, kernel_initializer=self._initializer(index))(hidden)
-            hidden = BatchNormalization()(hidden)
             hidden = LeakyReLU(0.2)(hidden)
-            hidden = Dropout(0.5)(hidden)
+            dropout_seed = None if self.seed is None else int(self.seed) + 100 + index
+            hidden = Dropout(0.5, seed=dropout_seed)(hidden)
         outputs = Dense(
             1,
             activation="sigmoid",

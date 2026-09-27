@@ -132,10 +132,15 @@ class GanifyTests(unittest.TestCase):
         critic_names = {type(layer).__name__ for layer in self.wgan.adversary_two.layers}
         self.assertNotIn("Dropout", critic_names)
         self.assertNotIn("BatchNormalization", critic_names)
-        for weights in self.wgan.adversary_two.get_weights():
-            self.assertLessEqual(float(np.max(np.abs(weights))), 0.01 + 1e-5)
-        generator_peak = max(float(np.max(np.abs(weights))) for weights in self.wgan.adversary_one.get_weights())
+        critic_peak = max(
+            float(np.max(np.abs(weights))) for weights in self.wgan.adversary_two.get_weights()
+        )
+        self.assertGreater(critic_peak, 0.01)
+        generator_peak = max(
+            float(np.max(np.abs(weights))) for weights in self.wgan.adversary_one.get_weights()
+        )
         self.assertGreater(generator_peak, 0.01)
+        self.assertGreater(float(np.std(self.wgan.create_bulk(32)[:, 0])), 1e-3)
 
         synthetic = self.wgan.create_bulk(16)
         self.assertEqual(synthetic.shape, (16, 3))
@@ -190,18 +195,18 @@ class GanifyTests(unittest.TestCase):
     def test_multi_epoch_updates_weights_and_resets_on_refit(self):
         first = _fit(_small_model(0), self.x, self.y, epochs=1)
         second = _fit(_small_model(0), self.x, self.y, epochs=2)
-        self.assertFalse(
-            np.array_equal(
-                first.adversary_one.get_weights()[0],
-                second.adversary_one.get_weights()[0],
+        generator_shift = float(
+            np.max(
+                np.abs(first.adversary_one.get_weights()[0] - second.adversary_one.get_weights()[0])
             )
         )
-        self.assertFalse(
-            np.array_equal(
-                first.adversary_two.get_weights()[0],
-                second.adversary_two.get_weights()[0],
+        critic_shift = float(
+            np.max(
+                np.abs(first.adversary_two.get_weights()[0] - second.adversary_two.get_weights()[0])
             )
         )
+        self.assertGreater(generator_shift, 1e-5)
+        self.assertGreater(critic_shift, 1e-5)
         self.assertEqual(len(second.g_hist), 4)
         second.fit_data(self.x, self.y, epochs=1, batch_size=16, n_critic=1, verbose=0)
         self.assertEqual(len(second.g_hist), 2)
@@ -221,6 +226,14 @@ class GanifyTests(unittest.TestCase):
         np.testing.assert_allclose(left.create_bulk(8), right.create_bulk(8), rtol=1e-5, atol=1e-5)
         self.assertFalse(
             np.array_equal(left.adversary_one.get_weights()[0], other.adversary_one.get_weights()[0])
+        )
+        gan_left = _fit(_small_model(0), self.x, self.y, type="gan")
+        gan_right = _fit(_small_model(0), self.x, self.y, type="gan")
+        np.testing.assert_allclose(
+            gan_left.adversary_one.get_weights()[0],
+            gan_right.adversary_one.get_weights()[0],
+            rtol=1e-5,
+            atol=1e-5,
         )
 
     def test_early_stopping(self):
@@ -327,6 +340,8 @@ class GanifyTests(unittest.TestCase):
             model.fit_data(self.x, self.y, min_delta=-0.1, verbose=0)
         with self.assertRaises(ValueError):
             model.fit_data(self.x, self.y, label_flip=1.5, verbose=0)
+        with self.assertRaises(ValueError):
+            model.fit_data(self.x, self.y, gradient_penalty=-1, verbose=0)
         frame = pd.DataFrame(self.x, columns=list("abc"))
         shifted = pd.Series(self.y, index=np.arange(1, 33))
         with self.assertRaises(ValueError):

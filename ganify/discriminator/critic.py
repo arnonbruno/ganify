@@ -3,8 +3,6 @@ from tensorflow.keras.layers import Dense, Input, LeakyReLU
 from tensorflow.keras.models import Model
 
 from ganify.utilities.utils import (
-    WGAN_CLIP_VALUE,
-    ClipConstraint,
     Utilities,
     hidden_width,
     kernel_initializer,
@@ -22,8 +20,7 @@ class Critic:
         self.seed = seed
         self.max_units = int(max_units)
         self.utilities = Utilities()
-        self.const = ClipConstraint(WGAN_CLIP_VALUE)
-        self.optimizer = self.utilities.get_optimizer_wgan()
+        self.optimizer = self.utilities.get_optimizer_wgan_gp()
         self.loss = wasserstein_loss
 
     def _initializer(self, index):
@@ -40,19 +37,12 @@ class Critic:
         inputs = Input(shape=(self.feat,), name="features")
         hidden = inputs
         for index, width in enumerate(widths):
-            hidden = Dense(
-                width,
-                kernel_initializer=self._initializer(index),
-                kernel_constraint=self.const,
-                bias_constraint=self.const,
-            )(hidden)
+            hidden = Dense(width, kernel_initializer=self._initializer(index))(hidden)
             hidden = LeakyReLU(0.2)(hidden)
         outputs = Dense(
             1,
             activation="linear",
             kernel_initializer=self._initializer(len(widths)),
-            kernel_constraint=self.const,
-            bias_constraint=self.const,
         )(hidden)
         self.critic = Model(inputs, outputs, name="critic")
         self.critic.compile(loss=self.loss, optimizer=self.optimizer)

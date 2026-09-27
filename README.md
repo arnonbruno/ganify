@@ -80,11 +80,11 @@ The animation is the original walkthrough. The class exported by the package is 
 - `critic_scores_` holds the critic or discriminator score of each drawn row. Lower is not automatically better; the scores are a diagnostic.
 - `history_["real"]`, `history_["fake"]`, and `history_["generator"]` are the per-step losses. Each point is the mean of that step only.
 
-`type="wgan"` trains a weight-clipped critic with RMSprop and labels of -1 for real rows and +1 for generated rows. `type="gan"` trains a sigmoid discriminator with binary cross-entropy and labels of 1 and 0. About 5% of adversary labels are flipped per row (`label_flip`). The generator is a tanh MLP. Hidden width grows with the number of features and is capped at `max_units` (default 512) so a wide table does not build an unbounded network.
+`type="wgan"` trains a critic with labels of -1 for real rows and +1 for generated rows, plus a gradient penalty of weight 10 (WGAN-GP). `type="gan"` trains a sigmoid discriminator with binary cross-entropy and labels of 1 and 0. About 5% of adversary labels are flipped per row (`label_flip`). The generator is a tanh MLP with Glorot initialization. Hidden width grows with the number of features and is capped at `max_units` (default 512) so a wide table does not build an unbounded network.
 
 An epoch shuffles the rows and visits each row once. A trailing single row is folded into the previous batch. Pass `patience` to stop after that many epochs without a sufficient drop in generator loss. `plot_performance(path=..., show=False)` writes the curves without opening a window.
 
-`Ganify(random_state=42)` makes a fit repeatable. Construction does not reseed NumPy. `fit_data` seeds TensorFlow and uses a private NumPy generator for shuffling, noise, and label flips.
+`Ganify(random_state=42)` makes a fit repeatable. Construction does not reseed NumPy. `fit_data` seeds TensorFlow and Keras, then restores the global Python and NumPy generators. Shuffling, noise, and label flips use a private NumPy generator.
 
 ## Classic GAN
 
@@ -115,9 +115,9 @@ python -m unittest discover -s tests -v
 
 ## What changed in 1.1.0
 
-- The GAN path uses 0/1 labels and binary cross-entropy. The WGAN path keeps the Wasserstein labels and clips every critic kernel and bias to [-0.01, 0.01] after each update.
+- The GAN path uses 0/1 labels and binary cross-entropy. The WGAN path keeps the Wasserstein labels and adds a gradient penalty so the critic can train a small fully connected generator without the vanishing updates of weight clipping.
 - Generator and adversary steps use separate optimizers. Generated rows shown to the adversary are detached from the generator.
-- The generator is a plain MLP. Dropout and batch normalization were removed so sampling uses the same function that was trained. That matters for the small batches this library is aimed at.
+- The generator is a plain MLP. Dropout and batch normalization were removed so sampling uses the same function that was trained. The discriminator keeps seeded dropout and no batch normalization, which is steadier for the small batches this library uses.
 - Epochs cover the rows without replacement. Loss history stores each step, not a cumulative average.
 - Scaling preserves constant columns and refuses non-finite input. One-hot targets with a single repeated row are recognized as one class.
 - `create_bulk` generates in batches, `save` / `load` persist a fitted model, and early stopping is available through `patience`.
