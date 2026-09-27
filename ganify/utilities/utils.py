@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from tensorflow.keras.constraints import Constraint
-from tensorflow.keras.initializers import RandomNormal
+from tensorflow.keras.initializers import GlorotNormal
 from tensorflow.keras.optimizers import Adam, RMSprop
 
 WGAN_CLIP_VALUE = 0.01
@@ -29,9 +29,14 @@ def wasserstein_loss(y_true, y_pred):
 
 
 def kernel_initializer(seed, index):
+    """Glorot init with a distinct seed per layer.
+
+    A fixed normal standard deviation of 0.02 collapses a plain MLP. Glorot
+    keeps generator outputs spread through the tanh range.
+    """
     if seed is None:
-        return RandomNormal(mean=0.0, stddev=0.02)
-    return RandomNormal(mean=0.0, stddev=0.02, seed=int(seed) + int(index) * 997)
+        return GlorotNormal()
+    return GlorotNormal(seed=int(seed) + int(index) * 997)
 
 
 def hidden_width(n_features, multiplier, max_units):
@@ -285,6 +290,10 @@ class Utilities:
 
     def get_optimizer_wgan(self):
         return _optimizer(RMSprop, 0.00005)
+
+    def get_optimizer_wgan_gp(self):
+        # Adam settings from Gulrajani et al., WGAN-GP.
+        return _optimizer(Adam, 0.0001, beta_1=0.5, beta_2=0.9)
 
     def get_optimizer_gan(self):
         return _optimizer(Adam, 0.0002, beta_1=0.5)

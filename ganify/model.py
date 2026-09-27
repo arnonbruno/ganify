@@ -1,5 +1,6 @@
 import json
 import math
+import random
 import warnings
 from pathlib import Path
 
@@ -13,7 +14,6 @@ from ganify.discriminator.critic import Critic
 from ganify.discriminator.discriminator import Discriminator
 from ganify.generator.generator import Generator
 from ganify.utilities.utils import (
-    WGAN_CLIP_VALUE,
     RobustMinMaxScaler,
     Utilities,
     adversary_targets,
@@ -39,8 +39,10 @@ class Ganify:
     ``fit_data`` learns a generator from rows that all share one target value.
     ``create_bulk`` draws new rows and maps them back into the training range
     of each column. Architecture width is capped, constant columns are
-    preserved, and both networks are updated with an explicit gradient step
-    so the critic or discriminator cannot be trained by the generator step.
+    preserved, and each network is updated on its own so the generator step
+    cannot change the critic or discriminator. The WGAN path uses a gradient
+    penalty instead of weight clipping, which keeps the critic's learning
+    signal from vanishing in a small fully connected network.
     """
 
     def __init__(self, random_state=42, random_dim=100, max_units=512):
@@ -86,7 +88,16 @@ class Ganify:
     def _reseed(self):
         if self.random_state is None:
             return
-        tf.random.set_seed(int(self.random_state))
+        # Keras dropout and initialization use the backend seed. Restore the
+        # global Python and NumPy generators so a fit does not disturb the caller.
+        python_state = random.getstate()
+        numpy_state = np.random.get_state()
+        try:
+            tf.keras.utils.set_random_seed(int(self.random_state))
+        except AttributeError:
+            tf.random.set_seed(int(self.random_state))
+        random.setstate(python_state)
+        np.random.set_state(numpy_state)
         self._rng = np.random.default_rng(int(self.random_state))
 
     def _noise(self, rows):
@@ -99,7 +110,7 @@ class Ganify:
             return tf.reduce_mean(y_true * y_pred)
         return self._bce(y_true, y_pred)
 
-    def _update(self, model, optimizer, features, labels, clip_value=None):
+    def _update(self, model, optimizer, features, labels):
         variables = list(model.trainable_variables)
         features = tf.convert_to_tensor(features)
         labels = tf.convert_to_tensor(labels)
@@ -108,11 +119,33 @@ class Ganify:
             loss = self._objective(labels, predictions)
         pairs = finite_gradient_pairs(tape.gradient(loss, variables), variables)
         optimizer.apply_gradients(pairs)
-        if clip_value is not None:
-            limit = tf.cast(clip_value, variables[0].dtype)
-            for variable in variables:
-                variable.assign(tf.clip_by_value(variable, -limit, limit))
         return scalar_loss(loss)
+
+    def _gradient_penalty(self, real, fake):
+        batch = int(real.shape[0])
+        epsilon = tf.constant(self._rng.random((batch, 1)), dtype=real.dtype)
+        interpolated = epsilon * real + (1.0 - epsilon) * fake
+        with tf.GradientTape() as tape:
+            tape.watch(interpolated)
+            scores = tf.reshape(self.adversary_two(interpolated, training=True), (-1,))
+        gradients = tape.gradient(scores, interpolated)
+        slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients), axis=1) + 1e-12)
+        return tf.reduce_mean(tf.square(slopes - 1.0))
+
+    def _update_critic_wgan(self, real, fake, y_real, y_fake):
+        variables = list(self.adversary_two.trainable_variables)
+        real = tf.convert_to_tensor(real)
+        fake = tf.convert_to_tensor(fake)
+        y_real = tf.convert_to_tensor(y_real)
+        y_fake = tf.convert_to_tensor(y_fake)
+        with tf.GradientTape() as tape:
+            loss_real = self._objective(y_real, self.adversary_two(real, training=True))
+            loss_fake = self._objective(y_fake, self.adversary_two(fake, training=True))
+            penalty = self._gradient_penalty(real, fake)
+            loss = loss_real + loss_fake + self.gradient_penalty_ * penalty
+        pairs = finite_gradient_pairs(tape.gradient(loss, variables), variables)
+        self._adversary_optimizer.apply_gradients(pairs)
+        return scalar_loss(loss_real), scalar_loss(loss_fake)
 
     def _update_generator(self, noise, labels):
         variables = list(self.adversary_one.trainable_variables)
@@ -126,13 +159,6 @@ class Ganify:
         self._generator_optimizer.apply_gradients(pairs)
         return scalar_loss(loss)
 
-    def _clip_critic(self):
-        if self.type != "wgan":
-            return
-        limit = tf.cast(WGAN_CLIP_VALUE, self.adversary_two.trainable_variables[0].dtype)
-        for variable in self.adversary_two.trainable_variables:
-            variable.assign(tf.clip_by_value(variable, -limit, limit))
-
     def fit_data(
         self,
         x_train,
@@ -145,6 +171,7 @@ class Ganify:
         min_delta=0.0,
         n_critic=5,
         label_flip=0.05,
+        gradient_penalty=10.0,
         verbose=1,
     ):
         """Fit a generator on one class of numeric rows.
@@ -178,6 +205,8 @@ class Ganify:
             follows the original WGAN training ratio.
         label_flip:
             Per-row label noise probability in ``[0, 1]``.
+        gradient_penalty:
+            Weight of the WGAN-GP penalty. Ignored for ``type="gan"``.
         verbose:
             ``0`` silences the progress bar and epoch log.
         """
@@ -195,6 +224,9 @@ class Ganify:
         label_flip = float(label_flip)
         if not np.isfinite(label_flip) or not 0.0 <= label_flip <= 1.0:
             raise ValueError("label_flip must be between 0 and 1")
+        gradient_penalty = float(gradient_penalty)
+        if not np.isfinite(gradient_penalty) or gradient_penalty < 0:
+            raise ValueError("gradient_penalty must be a finite number >= 0")
 
         x, x_columns, x_index = to_float_matrix(x_train, "x_train")
         if len(x) < 2:
@@ -216,6 +248,7 @@ class Ganify:
         self.batch_size_ = batch_size
         self.n_critic_ = n_critic
         self.label_flip_ = label_flip
+        self.gradient_penalty_ = gradient_penalty
         self.cols_names = names
         self.y_label_ = y_label
         self.n_features_ = int(x.shape[1])
@@ -237,8 +270,8 @@ class Ganify:
         if model_type == "wgan":
             self.critic = Critic(x, seed=self.random_state, max_units=self.max_units)
             self.adversary_two = self.critic.get_critic()
-            self._adversary_optimizer = self.utils.get_optimizer_wgan()
-            self._generator_optimizer = self.utils.get_optimizer_wgan()
+            self._adversary_optimizer = self.utils.get_optimizer_wgan_gp()
+            self._generator_optimizer = self.utils.get_optimizer_wgan_gp()
             self.loss = wasserstein_loss
         else:
             self.discriminator = Discriminator(
@@ -250,7 +283,6 @@ class Ganify:
             self.loss = "binary_crossentropy"
         self.opt = self._generator_optimizer
         self._bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-        self._clip_critic()
         self.gan = None
 
         if batch_size > len(self.x_train):
@@ -284,25 +316,17 @@ class Ganify:
                     y_fake = adversary_targets(
                         self._rng, len(batch_index), "fake", self.type, label_flip
                     )
-                    clip_value = WGAN_CLIP_VALUE if self.type == "wgan" else None
-                    real_losses.append(
-                        self._update(
-                            self.adversary_two,
-                            self._adversary_optimizer,
-                            real,
-                            y_real,
-                            clip_value,
+                    if self.type == "wgan":
+                        real_loss, fake_loss = self._update_critic_wgan(real, fake, y_real, y_fake)
+                    else:
+                        real_loss = self._update(
+                            self.adversary_two, self._adversary_optimizer, real, y_real
                         )
-                    )
-                    fake_losses.append(
-                        self._update(
-                            self.adversary_two,
-                            self._adversary_optimizer,
-                            fake,
-                            y_fake,
-                            clip_value,
+                        fake_loss = self._update(
+                            self.adversary_two, self._adversary_optimizer, fake, y_fake
                         )
-                    )
+                    real_losses.append(real_loss)
+                    fake_losses.append(fake_loss)
                 self.d1_hist.append(float(np.mean(real_losses)))
                 self.d2_hist.append(float(np.mean(fake_losses)))
                 g_loss = self._update_generator(
@@ -462,6 +486,7 @@ class Ganify:
             "g_hist": self.g_hist,
             "stopped_epoch": self.stopped_epoch_,
             "label_flip": self.label_flip_,
+            "gradient_penalty": self.gradient_penalty_,
             "n_critic": self.n_critic_,
             "batch_size": self.batch_size_,
             "epochs": self.epochs,
@@ -517,6 +542,7 @@ class Ganify:
         model.cols_names = metadata.get("cols_names")
         model.y_label_ = metadata.get("y_label")
         model.label_flip_ = metadata.get("label_flip", 0.05)
+        model.gradient_penalty_ = metadata.get("gradient_penalty", 10.0)
         model.n_critic_ = metadata.get("n_critic", 5)
         model.batch_size_ = metadata.get("batch_size")
         model.epochs = metadata.get("epochs")
