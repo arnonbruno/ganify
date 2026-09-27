@@ -1,29 +1,38 @@
+import re
+from pathlib import Path
+
 import setuptools
 
-# The directory containing this file
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+root = Path(__file__).parent
+version = re.search(
+    r'__version__\s*=\s*[\'"]([^\'"]+)[\'"]',
+    (root / "ganify" / "_version.py").read_text(encoding="utf-8"),
+).group(1)
+long_description = (root / "README.md").read_text(encoding="utf-8")
 
-
-# This call to setup() does all the work
 setuptools.setup(
     name="ganify",
-    version="1.0.10",
-    description="An Easy way to use GANs for data augmentation",
+    version=version,
+    description="An easy way to use GANs for tabular data augmentation",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/arnonbruno/ganify",
     author="Arnon Bruno",
     author_email="asantos.quantum@gmail.com",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=("tests", "tests.*")),
     include_package_data=True,
-    python_requires='>=3.6',
+    python_requires=">=3.8",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['tensorflow>=2.0.0', 'pandas>=0.25',
-                      'numpy>=1.16', 'scikit-learn>=0.21', 'matplotlib>=3.1',
-                      'tqdm>=4.15'],
+    install_requires=[
+        "tensorflow>=2.2",
+        "pandas>=0.25",
+        "numpy>=1.16",
+        "scikit-learn>=0.21",
+        "matplotlib>=3.1",
+        "tqdm>=4.15",
+    ],
 )
