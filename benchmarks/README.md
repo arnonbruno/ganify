@@ -1,8 +1,8 @@
 # GANify benchmark protocol
 
-This package is the reproducibility and release-gating layer for GANify. It
-keeps every dataset, seed, model, metric, and generation stage auditable.
-There is deliberately no weighted or blended quality score.
+This package runs the GANify benchmarks and the release decision. Each run
+records the dataset, seeds, model, metric, and generation stage. Metrics stay
+separate. There is no combined quality score.
 
 ## Suites
 
@@ -13,10 +13,10 @@ There is deliberately no weighted or blended quality score.
 - `configs/suites/stress.yaml`: wide, high-cardinality, and very large tables
   needed for broad performance claims.
 
-Dataset source/version/license/task/stressor metadata lives in
-`manifests/datasets/catalog.yaml`. Downloads are intentionally deferred.
-`load_dataset(...)` states the expected local path and source URL when data is
-missing, and verifies SHA-256 whenever a checksum is pinned.
+Dataset source, version, license, task, and size notes live in
+`manifests/datasets/catalog.yaml`. The harness does not download data.
+`load_dataset(...)` reports the expected local path and source URL when a file
+is missing, and checks SHA-256 when a checksum is set.
 
 ## Reproducibility contract
 
@@ -38,8 +38,8 @@ dataset_id, model_name, split_seed, model_seed, stage, pillar, metric, value
 The `stage` field is mandatory for generated data. Use `raw`, `calibrated`, and
 `projected` as separate records; controls use `bootstrap_control` and
 `permuted_control`. `aggregate_runs` preserves these keys and returns
-per-metric uncertainty. `evaluate_gates` applies every rule conjunctively,
-fails missing required evidence closed, and emits one decision per rule.
+per-metric uncertainty. `evaluate_gates` applies every rule, treats a missing
+required metric as a failure, and emits one decision per rule.
 
 The YAML files use JSON-compatible syntax so the harness works offline without
 adding a YAML dependency.
