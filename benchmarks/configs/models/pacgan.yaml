@@ -1,0 +1,17 @@
+{
+  "name": "pacgan",
+  "factor": "pac",
+  "description": "Two-row PacGAN critic with the baseline parameter budget.",
+  "engine": {
+    "noise_dim": 32,
+    "generator_dims": [64, 64],
+    "critic_dims": [64, 64],
+    "critic_architecture": "residual",
+    "pac": 2,
+    "match_critic_parameters": true,
+    "ema_decay": 0.999
+  },
+  "sampling_stages": {
+    "raw_ema": "ema"
+  }
+}

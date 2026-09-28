@@ -1,0 +1,18 @@
+{
+  "name": "feature_matching",
+  "factor": "critic_feature_matching",
+  "description": "Critic representation mean matching only.",
+  "engine": {
+    "noise_dim": 32,
+    "generator_dims": [64, 64],
+    "critic_dims": [64, 64],
+    "critic_architecture": "residual",
+    "pac": 1,
+    "interaction_weight": 0.0,
+    "feature_matching_weight": 1.0,
+    "ema_decay": 0.999
+  },
+  "sampling_stages": {
+    "raw_ema": "ema"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "fourier",
+  "factor": "critic_architecture",
+  "description": "Parameter-matched random Fourier feature/FCT-style critic.",
+  "engine": {
+    "noise_dim": 32,
+    "generator_dims": [64, 64],
+    "critic_dims": [64, 64],
+    "critic_architecture": "fourier",
+    "fourier_features": 16,
+    "fourier_scale": 1.0,
+    "pac": 1,
+    "match_critic_parameters": true,
+    "ema_decay": 0.999
+  },
+  "sampling_stages": {
+    "raw_ema": "ema"
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "version": "1",
+  "description": "Preregistered conjunctive release gates with fail-closed privacy confidence bounds; there is no blended quality score.",
+  "rules": [
+    {
+      "id": "reliability_success_rate",
+      "metric": "fit_success_rate",
+      "operator": ">=",
+      "threshold": 0.96,
+      "aggregation": "minimum",
+      "pillar": "reliability",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "raw_dependence_gap",
+      "metric": "normalized_dependence_gap",
+      "operator": "<=",
+      "threshold": 0.50,
+      "aggregation": "median",
+      "pillar": "dependence",
+      "stage": "raw",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "calibrated_dependence_gap",
+      "metric": "normalized_dependence_gap",
+      "operator": "<=",
+      "threshold": 0.50,
+      "aggregation": "median",
+      "pillar": "dependence",
+      "stage": "calibrated",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "projected_dependence_gap",
+      "metric": "normalized_dependence_gap",
+      "operator": "<=",
+      "threshold": 0.50,
+      "aggregation": "median",
+      "pillar": "dependence",
+      "stage": "projected",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "raw_tstr_relative_utility",
+      "metric": "relative_primary_utility",
+      "operator": ">=",
+      "threshold": 0.90,
+      "aggregation": "median",
+      "pillar": "utility",
+      "stage": "raw",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "calibrated_tstr_relative_utility",
+      "metric": "relative_primary_utility",
+      "operator": ">=",
+      "threshold": 0.90,
+      "aggregation": "median",
+      "pillar": "utility",
+      "stage": "calibrated",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "projected_tstr_relative_utility",
+      "metric": "relative_primary_utility",
+      "operator": ">=",
+      "threshold": 0.90,
+      "aggregation": "median",
+      "pillar": "utility",
+      "stage": "projected",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "projected_constraint_validity",
+      "metric": "valid_rate",
+      "operator": ">=",
+      "threshold": 0.999,
+      "aggregation": "minimum",
+      "pillar": "constraint",
+      "stage": "projected",
+      "detail": "__all__",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "bootstrap_exact_match_sanity",
+      "metric": "exact_match_rate",
+      "operator": "==",
+      "threshold": 1.0,
+      "aggregation": "median",
+      "pillar": "nearest_neighbor",
+      "stage": "bootstrap_control",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "permuted_dependence_sanity",
+      "metric": "normalized_dependence_gap",
+      "operator": ">=",
+      "threshold": 0.90,
+      "aggregation": "median",
+      "pillar": "dependence",
+      "stage": "permuted_control",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "privacy_collision_adjusted_matches",
+      "metric": "collision_adjusted_exact_match_rate_ci_high",
+      "operator": "<=",
+      "threshold": 0.01,
+      "aggregation": "maximum",
+      "pillar": "privacy_attack",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "privacy_membership_auc",
+      "metric": "membership_roc_auc_ci_high",
+      "operator": "<=",
+      "threshold": 0.60,
+      "aggregation": "maximum",
+      "pillar": "privacy_attack",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "privacy_membership_low_fpr",
+      "metric": "membership_tpr_at_1pct_fpr_ci_high",
+      "operator": "<=",
+      "threshold": 0.10,
+      "aggregation": "maximum",
+      "pillar": "privacy_attack",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "privacy_attribute_inference",
+      "metric": "attribute_inference_advantage_ci_high",
+      "operator": "<=",
+      "threshold": 0.10,
+      "aggregation": "maximum",
+      "pillar": "privacy_attack",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "privacy_singling_out",
+      "metric": "singling_out_excess_success_rate_ci_high",
+      "operator": "<=",
+      "threshold": 0.05,
+      "aggregation": "maximum",
+      "pillar": "privacy_attack",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "privacy_linkability",
+      "metric": "linkability_excess_success_rate_ci_high",
+      "operator": "<=",
+      "threshold": 0.05,
+      "aggregation": "maximum",
+      "pillar": "privacy_attack",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "privacy_canary_extraction",
+      "metric": "canary_extraction_rate_ci_high",
+      "operator": "==",
+      "threshold": 0.0,
+      "aggregation": "maximum",
+      "pillar": "privacy_attack",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "formal_dp_accountant_valid",
+      "metric": "dp_accountant_valid",
+      "operator": "==",
+      "threshold": 1.0,
+      "aggregation": "minimum",
+      "pillar": "privacy_dp",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "formal_dp_preprocessing_boundary",
+      "metric": "dp_preprocessing_accounted",
+      "operator": "==",
+      "threshold": 1.0,
+      "aggregation": "minimum",
+      "pillar": "privacy_dp",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "formal_dp_conditioning_boundary",
+      "metric": "dp_conditional_frequencies_accounted",
+      "operator": "==",
+      "threshold": 1.0,
+      "aggregation": "minimum",
+      "pillar": "privacy_dp",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "formal_dp_dataset_size_boundary",
+      "metric": "dp_dataset_size_public",
+      "operator": "==",
+      "threshold": 1.0,
+      "aggregation": "minimum",
+      "pillar": "privacy_dp",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "formal_dp_noise_randomness",
+      "metric": "dp_noise_randomness_accounted",
+      "operator": "==",
+      "threshold": 1.0,
+      "aggregation": "minimum",
+      "pillar": "privacy_dp",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "formal_dp_delta_boundary",
+      "metric": "dp_delta_boundary_valid",
+      "operator": "==",
+      "threshold": 1.0,
+      "aggregation": "minimum",
+      "pillar": "privacy_dp",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "id": "formal_dp",
+      "metric": "formal_dp",
+      "operator": "==",
+      "threshold": 1.0,
+      "aggregation": "minimum",
+      "pillar": "privacy_dp",
+      "minimum_count": 1,
+      "required": true
+    }
+  ]
+}

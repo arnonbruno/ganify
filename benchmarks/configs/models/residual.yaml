@@ -1,0 +1,16 @@
+{
+  "name": "residual",
+  "factor": "baseline",
+  "description": "Residual MLP critic reference; no anti-collapse add-on.",
+  "engine": {
+    "noise_dim": 32,
+    "generator_dims": [64, 64],
+    "critic_dims": [64, 64],
+    "critic_architecture": "residual",
+    "pac": 1,
+    "ema_decay": 0.999
+  },
+  "sampling_stages": {
+    "raw_ema": "ema"
+  }
+}

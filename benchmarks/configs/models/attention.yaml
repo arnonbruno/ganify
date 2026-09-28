@@ -1,0 +1,18 @@
+{
+  "name": "attention",
+  "factor": "critic_architecture",
+  "description": "Parameter-matched feature-token self-attention critic.",
+  "engine": {
+    "noise_dim": 32,
+    "generator_dims": [64, 64],
+    "critic_dims": [64, 64],
+    "critic_architecture": "attention",
+    "attention_heads": 4,
+    "pac": 1,
+    "match_critic_parameters": true,
+    "ema_decay": 0.999
+  },
+  "sampling_stages": {
+    "raw_ema": "ema"
+  }
+}

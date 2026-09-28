@@ -1,0 +1,16 @@
+{
+  "name": "smoke",
+  "version": "1",
+  "description": "Offline/PR protocol: controlled panel and deterministic 10k-row public-data subsets.",
+  "datasets": [
+    "controlled_panel",
+    "adult",
+    "california_housing",
+    "dry_bean",
+    "kuairand_pure"
+  ],
+  "split_seeds": [0],
+  "model_seeds": [0],
+  "sample_seeds": [0],
+  "max_rows": 10000
+}

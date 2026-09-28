@@ -1,0 +1,18 @@
+{
+  "name": "warmup",
+  "factor": "masked_denoising_warmup",
+  "description": "Typed generator warmup with masked encoded-row reconstruction.",
+  "engine": {
+    "noise_dim": 32,
+    "generator_dims": [64, 64],
+    "critic_dims": [64, 64],
+    "critic_architecture": "residual",
+    "pac": 1,
+    "warmup_epochs": 5,
+    "warmup_mask_probability": 0.2,
+    "ema_decay": 0.999
+  },
+  "sampling_stages": {
+    "raw_ema": "ema"
+  }
+}

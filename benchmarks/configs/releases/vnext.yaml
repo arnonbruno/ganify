@@ -1,0 +1,321 @@
+{
+  "version": "vnext-1",
+  "candidate": "ganify-vNext",
+  "candidate_model": "ganify_conditional",
+  "description": "Preregistered fail-closed vNext release protocol. No blended score is permitted.",
+  "sealed_test": true,
+  "test_size": 0.2,
+  "validation_size": 0.1,
+  "controlled_rows": 10000,
+  "cheap_rows": 256,
+  "cheap_suite_name": "smoke",
+  "suites": [
+    "smoke",
+    "core",
+    "stress"
+  ],
+  "mandatory_baselines": [
+    "bootstrap",
+    "independent_marginals",
+    "gaussian_copula"
+  ],
+  "frontier_baselines": [
+    "ctgan",
+    "ctab_gan_plus",
+    "taegan",
+    "arf",
+    "tabddpm",
+    "tabsyn",
+    "tabdiff"
+  ],
+  "cheap_models": [
+    "ganify_conditional",
+    "bootstrap",
+    "independent_marginals",
+    "gaussian_copula"
+  ],
+  "models": [
+    {
+      "name": "ganify_conditional",
+      "adapter": "ganify_conditional",
+      "role": "candidate",
+      "mandatory": true,
+      "config": {
+        "epochs": 50,
+        "batch_size": 128,
+        "n_critic": 5,
+        "noise_dim": 64,
+        "generator_dims": [256, 256],
+        "critic_dims": [256, 256],
+        "continuous_transform": "copula",
+        "continuous_bins": 10,
+        "ema_decay": 0.999
+      }
+    },
+    {
+      "name": "bootstrap",
+      "adapter": "bootstrap",
+      "role": "positive_control",
+      "mandatory": true
+    },
+    {
+      "name": "independent_marginals",
+      "adapter": "independent_marginals",
+      "role": "negative_control",
+      "mandatory": true
+    },
+    {
+      "name": "gaussian_copula",
+      "adapter": "gaussian_copula",
+      "role": "classical_baseline",
+      "mandatory": true
+    },
+    {
+      "name": "ctgan",
+      "adapter": "ctgan",
+      "role": "frontier_baseline"
+    },
+    {
+      "name": "ctab_gan_plus",
+      "adapter": "ctab_gan_plus",
+      "role": "frontier_baseline"
+    },
+    {
+      "name": "taegan",
+      "adapter": "taegan",
+      "role": "frontier_baseline"
+    },
+    {
+      "name": "arf",
+      "adapter": "arf",
+      "role": "frontier_baseline"
+    },
+    {
+      "name": "tabddpm",
+      "adapter": "tabddpm",
+      "role": "frontier_baseline"
+    },
+    {
+      "name": "tabsyn",
+      "adapter": "tabsyn",
+      "role": "frontier_baseline"
+    },
+    {
+      "name": "tabdiff",
+      "adapter": "tabdiff",
+      "role": "frontier_baseline"
+    }
+  ],
+  "ordinary_gates": {
+    "version": "vnext-ordinary",
+    "rules": [
+      {
+        "id": "candidate_run_reliability",
+        "metric": "run_success_rate",
+        "pillar": "reliability",
+        "model_name": "ganify_conditional",
+        "operator": "==",
+        "threshold": 1.0,
+        "aggregation": "minimum",
+        "minimum_count": 1
+      },
+      {
+        "id": "candidate_dependence",
+        "metric": "normalized_dependence_gap",
+        "pillar": "dependence",
+        "model_name": "ganify_conditional",
+        "stage": "raw",
+        "operator": "<=",
+        "threshold": 0.5,
+        "aggregation": "median",
+        "minimum_count": 1
+      },
+      {
+        "id": "controlled_constraints",
+        "metric": "valid_rate",
+        "pillar": "constraint",
+        "model_name": "ganify_conditional",
+        "dataset_id": "controlled_panel",
+        "detail": "__all__",
+        "operator": ">=",
+        "threshold": 0.999,
+        "aggregation": "minimum",
+        "minimum_count": 1
+      }
+    ]
+  },
+  "privacy_gates": {
+    "version": "vnext-privacy",
+    "rules": [
+      {
+        "id": "membership_upper_bound",
+        "metric": "membership_roc_auc_ci_high",
+        "pillar": "privacy_attack",
+        "operator": "<=",
+        "threshold": 0.60,
+        "aggregation": "maximum",
+        "minimum_count": 1
+      },
+      {
+        "id": "collision_adjusted_matches",
+        "metric": "collision_adjusted_exact_match_rate_ci_high",
+        "pillar": "privacy_attack",
+        "operator": "<=",
+        "threshold": 0.01,
+        "aggregation": "maximum",
+        "minimum_count": 1
+      },
+      {
+        "id": "singling_out",
+        "metric": "singling_out_excess_success_rate_ci_high",
+        "pillar": "privacy_attack",
+        "operator": "<=",
+        "threshold": 0.05,
+        "aggregation": "maximum",
+        "minimum_count": 1
+      },
+      {
+        "id": "linkability",
+        "metric": "linkability_excess_success_rate_ci_high",
+        "pillar": "privacy_attack",
+        "operator": "<=",
+        "threshold": 0.05,
+        "aggregation": "maximum",
+        "minimum_count": 1
+      }
+    ]
+  },
+  "claims": [
+    {
+      "id": "broad_sota",
+      "claim": "GANify vNext is broadly state of the art across the preregistered public tabular benchmark.",
+      "scope": "broad_sota",
+      "priority": 100,
+      "required_suites": ["smoke", "core", "stress"],
+      "required_models": ["ganify_conditional"],
+      "mandatory_baselines": [
+        "bootstrap",
+        "independent_marginals",
+        "gaussian_copula"
+      ],
+      "frontier_baselines": [
+        "ctgan",
+        "ctab_gan_plus",
+        "taegan",
+        "arf",
+        "tabddpm",
+        "tabsyn",
+        "tabdiff"
+      ],
+      "requires_privacy": true,
+      "requires_statistical_evidence": true,
+      "statistical_evidence": {
+        "confidence": 0.95,
+        "bootstrap_replicates": 1000,
+        "comparisons": [
+          {
+            "id": "dependence_vs_ctgan",
+            "metric": "normalized_dependence_gap",
+            "filters": {
+              "stage": "raw",
+              "pillar": "dependence"
+            },
+            "baseline": "ctgan",
+            "direction": "lower",
+            "minimum_pairs": 15,
+            "minimum_split_seeds": 3,
+            "minimum_model_seeds": 3,
+            "minimum_datasets": 5,
+            "minimum_effect": 0.0,
+            "statistic": "median"
+          },
+          {
+            "id": "utility_vs_ctgan",
+            "metric": "relative_primary_utility",
+            "filters": {
+              "stage": "raw",
+              "pillar": "utility"
+            },
+            "baseline": "ctgan",
+            "direction": "higher",
+            "minimum_pairs": 15,
+            "minimum_split_seeds": 3,
+            "minimum_model_seeds": 3,
+            "minimum_datasets": 5,
+            "minimum_effect": 0.0,
+            "statistic": "median"
+          }
+        ]
+      }
+    },
+    {
+      "id": "controlled_core",
+      "claim": "GANify vNext preserves the preregistered controlled-panel structure and constraints better than the independent-marginals control.",
+      "scope": "narrow_controlled_panel",
+      "priority": 20,
+      "required_suites": ["core"],
+      "required_models": ["ganify_conditional"],
+      "mandatory_baselines": [
+        "bootstrap",
+        "independent_marginals",
+        "gaussian_copula"
+      ],
+      "requires_privacy": true,
+      "requires_statistical_evidence": true,
+      "ordinary_gates": {
+        "version": "vnext-controlled",
+        "rules": [
+          {
+            "id": "controlled_reliability",
+            "metric": "run_success_rate",
+            "pillar": "reliability",
+            "model_name": "ganify_conditional",
+            "suite": "core",
+            "dataset_id": "controlled_panel",
+            "operator": "==",
+            "threshold": 1.0,
+            "aggregation": "minimum",
+            "minimum_count": 75
+          },
+          {
+            "id": "controlled_constraints",
+            "metric": "valid_rate",
+            "pillar": "constraint",
+            "model_name": "ganify_conditional",
+            "suite": "core",
+            "dataset_id": "controlled_panel",
+            "detail": "__all__",
+            "operator": ">=",
+            "threshold": 0.999,
+            "aggregation": "minimum",
+            "minimum_count": 75
+          }
+        ]
+      },
+      "statistical_evidence": {
+        "confidence": 0.95,
+        "bootstrap_replicates": 1000,
+        "comparisons": [
+          {
+            "id": "controlled_dependence_vs_independent",
+            "metric": "normalized_dependence_gap",
+            "filters": {
+              "suite": "core",
+              "dataset_id": "controlled_panel",
+              "stage": "raw",
+              "pillar": "dependence"
+            },
+            "baseline": "independent_marginals",
+            "direction": "lower",
+            "minimum_pairs": 15,
+            "minimum_split_seeds": 5,
+            "minimum_model_seeds": 5,
+            "minimum_sample_seeds": 3,
+            "minimum_effect": 0.0,
+            "statistic": "median"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "core",
+  "version": "1",
+  "description": "Mandatory release suite with five data splits and five model seeds.",
+  "datasets": [
+    "controlled_panel",
+    "adult",
+    "california_housing",
+    "dry_bean",
+    "kuairand_pure",
+    "bank_marketing",
+    "credit_default",
+    "credit_card_fraud",
+    "covertype",
+    "diabetes_130",
+    "ames_housing",
+    "beijing_pm25",
+    "online_news",
+    "communities_crime"
+  ],
+  "split_seeds": [0, 1, 2, 3, 4],
+  "model_seeds": [0, 1, 2, 3, 4],
+  "sample_seeds": [0, 1, 2],
+  "max_rows": null
+}

@@ -1,0 +1,20 @@
+{
+  "name": "swa",
+  "factor": "generator_swa",
+  "description": "Epoch-level stochastic weight averaging of the generator.",
+  "engine": {
+    "noise_dim": 32,
+    "generator_dims": [64, 64],
+    "critic_dims": [64, 64],
+    "critic_architecture": "residual",
+    "pac": 1,
+    "swa": true,
+    "swa_start_epoch": 1,
+    "swa_frequency": 1,
+    "ema_decay": 0.999
+  },
+  "sampling_stages": {
+    "raw_ema": "ema",
+    "raw_swa": "swa"
+  }
+}

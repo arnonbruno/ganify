@@ -48,12 +48,13 @@ class GanifyTests(unittest.TestCase):
         cls.gan = _fit(_small_model(1), cls.x, cls.y, type="gan")
 
     def test_version_and_public_api(self):
-        self.assertEqual(__version__, "1.1.0")
-        self.assertEqual(ganify.__version__, "1.1.0")
+        self.assertEqual(__version__, "2.0.0")
+        self.assertEqual(ganify.__version__, "2.0.0")
         self.assertIn("Ganify", ganify.__all__)
+        self.assertIn("QuantileCopulaScaler", ganify.__all__)
         self.assertNotIn("Adam", ganify.__all__)
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertIn("1.1.0", readme)
+        self.assertIn("2.0.0", readme)
         self.assertIn("logo.png", readme)
         self.assertIn("Ganify", readme)
         self.assertGreater((ROOT / "logo.png").stat().st_size, 0)

@@ -21,6 +21,15 @@ setuptools.setup(
     author_email="asantos.quantum@gmail.com",
     packages=setuptools.find_packages(exclude=("tests", "tests.*")),
     include_package_data=True,
+    package_data={
+        "benchmarks": [
+            "configs/gates/*.yaml",
+            "configs/models/*.yaml",
+            "configs/releases/*.yaml",
+            "configs/suites/*.yaml",
+            "manifests/datasets/*.yaml",
+        ]
+    },
     python_requires=">=3.8",
     classifiers=[
         "Programming Language :: Python :: 3",

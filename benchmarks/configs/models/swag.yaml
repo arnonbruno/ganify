@@ -1,0 +1,22 @@
+{
+  "name": "swag",
+  "factor": "generator_swag",
+  "description": "Diagonal plus low-rank SWAG generator sampling.",
+  "engine": {
+    "noise_dim": 32,
+    "generator_dims": [64, 64],
+    "critic_dims": [64, 64],
+    "critic_architecture": "residual",
+    "pac": 1,
+    "swag": true,
+    "swag_start_epoch": 1,
+    "swag_frequency": 1,
+    "swag_max_rank": 10,
+    "swag_scale": 1.0,
+    "ema_decay": 0.999
+  },
+  "sampling_stages": {
+    "raw_ema": "ema",
+    "raw_swag": "swag"
+  }
+}
